@@ -1,0 +1,31 @@
+@font-face {
+    font-family: 'MyWebFont';
+    src: url('customs/font/Pyidaungsu-2.5.3_Regular.ttf') format('ttf');
+}
+
+body {
+    font-family: 'MyWebFont', Fallback, sans-serif;
+}
+
+@page {
+    /* size: auto; */
+    /* auto is the initial value */
+    margin: 0;
+    /* this affects the margin in the printer settings */
+}
+
+@media print {
+
+    .btn-print,
+    .btn-card,
+    .btn-back,
+    .sidebar,
+    .payment-history,
+    .sticky-footer {
+        display: none;
+    }
+}
+
+.print-line-height {
+    line-height: 3px;
+}
