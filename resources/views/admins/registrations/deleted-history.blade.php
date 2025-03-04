@@ -16,7 +16,7 @@
                 </div>
 
                 <div class="col-sm-3">
-                    <form action="{{ route('admin.registrations.index') }}" method="GET">
+                    {{-- <form action="{{ route('admin.registrations.index') }}" method="GET">
                         @csrf
 
                         <div class="d-flex justify-content-end mb-2">
@@ -34,11 +34,11 @@
 
 
                         </div>
-                    </form>
+                    </form> --}}
                 </div>
 
                 <div class="col-sm-4">
-                    <form action="{{ route('admin.registrations.index') }}" method="GET">
+                    {{-- <form action="{{ route('admin.registrations.index') }}" method="GET">
                         @csrf
 
                         <div class="d-flex justify-content-end mb-2">
@@ -57,11 +57,11 @@
 
 
                         </div>
-                    </form>
+                    </form> --}}
                 </div>
 
                 <div class="col-sm-1 text-right">
-                    <a href="{{ route('admin.chooseType') }}">
+                    <a href="{{ route('admin.registrations.index') }}">
                         <button type="button" class="btn btn-sm btn-danger">Back</button>
                     </a>
                 </div>
@@ -93,7 +93,7 @@
                         </div>
                     </form> --}}
                 </div>
-                <div class="col-12 d-flex d-flex justify-content-between ">
+                {{-- <div class="col-12 d-flex d-flex justify-content-between ">
 
                     <div class="row">
                         <form action="{{ route('admin.registrations.index') }}" method="GET">
@@ -134,7 +134,7 @@
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> --}}
 
                 <div class="col-sm-12">
                     <div class="table-responsive">

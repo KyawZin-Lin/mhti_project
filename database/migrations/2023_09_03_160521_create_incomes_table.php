@@ -27,6 +27,7 @@ return new class extends Migration
             $table->integer('course_no')->nullable();
             $table->text('group')->nullable();
             $table->text('amount')->nullable();
+            $table->text('price')->nullable();
             $table->longText('remark')->nullable();
             $table->text('admin_user_id')->nullable();
             $table->text('payment_type')->nullable();
@@ -36,10 +37,13 @@ return new class extends Migration
             $table->text('left_money')->nullable();
             $table->text('payment_date')->nullable();
             // $table->text('title')->nullable();
+            $table->text('discount')->nullable();
+
             $table->text('paid_by')->nullable();
             $table->text('received_by')->nullable();
             $table->text('checked_by')->nullable();
             $table->text('status')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

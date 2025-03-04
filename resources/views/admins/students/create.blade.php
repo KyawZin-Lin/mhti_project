@@ -73,9 +73,14 @@
                                             <label for="" class="col-sm-4 col-md-4 text-md-end"><b>Student
                                                     Course ID</b></label>
                                             <div class="col-sm-6 col-md-6">
-                                                <input type="text" name="student_no" class="form-control student-no"
+                                                <input type="text" name="student_no"
+                                                    class="form-control @error('student_no') is-invalid @enderror student-no"
                                                     value="{{ old('student_no') }}">
                                             </div>
+
+                                            @error('student_no')
+                                                <p class="alert alert-danger">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
 
@@ -83,9 +88,9 @@
                                     <input type="hidden" name="course_abbre[]" class="course_abbre">
                                     <input type="hidden" name="course_no[]" class="course_no">
 
-                                    <input type="hidden" name="course_id[]" class="course_id1">
+                                    {{-- <input type="hidden" name="course_id[]" class="course_id1">
                                     <input type="hidden" name="course_abbre[]" class="course_abbre1">
-                                    <input type="hidden" name="course_no[]" class="course_no1">
+                                    <input type="hidden" name="course_no[]" class="course_no1"> --}}
                                 </div>
 
                                 {{-- <div class="row">

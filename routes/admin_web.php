@@ -58,6 +58,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin_user')->group(fun
 
     Route::get('/userguide', [DashboardController::class, 'userguide'])->name('userguide');
 
+
+    Route::get('/registrations/deleted-history', [RegistrationController::class,'deletedList'])->name('registrations.deleted-history');
+
     Route::resource('/registrations',RegistrationController::class);
 
     Route::get('/chooseType',[RegistrationController::class,'chooseType'])->name('chooseType');

@@ -13,8 +13,8 @@
                     <div class="float-left">Students</div>
                 </div>
                 <div class="col-sm-10 text-end">
-
-                    @if ($limit->limit_student >= count($students))
+                    {{-- {{dd(auth()->user()->limit_user)}}/ --}}
+                    @if ($limit?->limit_student >= count($students))
                         <a href="{{ route('admin.students.create') }}"><button type="button" class="btn btn-md btn-success"
                                 style="float:right;"><b><i class="fas fa-plus-square"></i>
                                     New Student</b></button></a>
@@ -112,6 +112,8 @@
 
                                 <input type="text" name="search" id="search" class="form-control bg-white"
                                     value="{{ request()->search }}" placeholder="Search Name...">
+                                <input type="text" name="student_id" id="student_id" class="form-control bg-white"
+                                    value="{{ request()->student_id }}" placeholder="Search Student ID...">
                             </div>
 
                             <div class="col-sm-4">

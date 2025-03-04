@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Admins\StudentLimit;
 use App\Models\AdminUser;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -194,6 +195,10 @@ class RoleAndPermissionUserSeeder extends Seeder
             'status' => 1,
         ]);
 
+        $studentLimit= StudentLimit::create([
+            'limit_student' =>10,
+            'admin_user_id' => $adminUser->id,
+        ]);
 
         $adminUser->assignRole(['Admin']);
 

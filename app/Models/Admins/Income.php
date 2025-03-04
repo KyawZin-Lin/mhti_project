@@ -10,10 +10,11 @@ use App\Models\Admins\PaymentType;
 use App\Models\Admins\IncomeSource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Income extends Model
 {
-    use HasFactory;
+    use HasFactory,SoftDeletes;
 
     protected $table = "incomes";
     protected $fillable = [

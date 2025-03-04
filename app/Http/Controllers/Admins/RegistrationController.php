@@ -83,15 +83,22 @@ class RegistrationController extends Controller
         $batch = Batch::where('id',$student->batch_id)->first();
         $course_fee = CourseFee::where('course_id',$student->degree->id)->first();
 
+        $income= Income::where('student_id',$student_id)->where('course_id',$course->id)->latest()->first();
+        // dd($income);
+        if(isset($income)){
+            $leftMoney= $income->left_money;
+        }
         $amount = (int)$course_fee->amount - ((int)$course_fee->amount * ((int)$course_fee->discount/100));
 
         return response()->json([
             'success' => 'Success',
             'course' => $course->name,
+            'course_id' => $course->id,
             'batch' => $batch->batch,
             'price' => $course_fee->amount,
             'discount' => $course_fee->discount,
             'amount' => $amount,
+            'left_money' => isset($leftMoney)? $leftMoney : null,
         ]);
     }
 
@@ -100,44 +107,44 @@ class RegistrationController extends Controller
      */
     public function create(Request $request)
     {
-        if($request->registration_type == 'Student')
-        {
-            $students = Student::get();
-            $incomeSources = IncomeSource::get();
-            $payment_types = PaymentType::get();
-            $courses = Degree::get();
-            $batches = Batch::get();
-            $income = Income::latest('id')->select('id')->first();
-            if(!$income){
-                $voucher_no = date("Y").$this->generate_numbers(1,1,5);
-            }else{
-                $voucher_no = date("Y").$this->generate_numbers($income->id + 1,1,5);
-            }
+        $students = Student::all();
+        $incomeSources = IncomeSource::all();
+        $payment_types = PaymentType::all();
+        $courses = Degree::all();
+        $batches = Batch::all();
 
-            return view('admins.registrations.student_registration',compact('students','incomeSources','payment_types','courses','batches','voucher_no'));
-        }elseif($request->registration_type == 'Office'){
-            $students = Student::get();
-            $incomeSources = IncomeSource::get();
-            $payment_types = PaymentType::get();
-            $courses = Degree::get();
-            $batches = Batch::get();
-            $income = Income::latest('id')->select('id')->first();
-            if(!$income){
-                $voucher_no = date("Y").$this->generate_numbers(1,1,5);
-            }else{
-                $voucher_no = date("Y").$this->generate_numbers($income->id + 1,1,5);
-            }
-            return view('admins.registrations.office_registration',compact('students','incomeSources','payment_types','courses','batches','voucher_no'));
+        $voucher_no = $this->generateVoucherNumber();
+
+        if ($request->registration_type == 'Student') {
+            return view('admins.registrations.student_registration', compact('students', 'incomeSources', 'payment_types', 'courses', 'batches', 'voucher_no'));
+        } elseif ($request->registration_type == 'Office') {
+            return view('admins.registrations.office_registration', compact('students', 'incomeSources', 'payment_types', 'courses', 'batches', 'voucher_no'));
         }
-
     }
 
-    public function generate_numbers($start,$count,$digits)
+    private function generateVoucherNumber()
     {
-        for($n = $start;$n<$start+$count;$n++){
-            $result = str_pad($n,$digits,"0",STR_PAD_LEFT);
+        $existingVouchers = Income::orderBy('voucher_no', 'asc')
+            ->pluck('voucher_no')
+            ->map(fn($voucher) => (int) substr($voucher, 4))
+            ->toArray();
+
+        $newVoucherNumber = $this->findMissingNumber($existingVouchers);
+
+        return date("Y") . str_pad($newVoucherNumber, 5, "0", STR_PAD_LEFT);
+    }
+
+    private function findMissingNumber(array $existingNumbers): int
+    {
+        if (empty($existingNumbers)) {
+            return 1;
         }
-        return $result;
+
+        for ($i = 1; $i <= max($existingNumbers) + 1; $i++) {
+            if (!in_array($i, $existingNumbers)) {
+                return $i;
+            }
+        }
     }
 
     /**
@@ -145,6 +152,7 @@ class RegistrationController extends Controller
      */
     public function store(Request $request)
     {
+        // dd(request()->all());
         $course = Degree::where('id',$request->course_id)->first();
 
         if($course){
@@ -162,12 +170,18 @@ class RegistrationController extends Controller
         $income->income_source_id = $request->income_source_id;
         $income->particular = $request->particular;
         $income->group = $request->group;
-        if($request->status == 'Student'){
-        $income->title = $request->title;
-        $income->code = $request->code;
-        $income->amount = $request->amount;
-    }
+            if($request->status == 'Student'){
+            $income->title = $request->title;
+            $income->code = $request->code;
+            $income->amount = $request->amount;
+            $income->price = $request->price;
+
+            }
         $income->remark = $request->remark;
+        $income->pay_money = $request->pay_money;
+        $income->left_money = $request->left_money;
+        $income->discount = $request->discount;
+
         $income->paid_by = $request->paid_by;
         $income->received_by = $request->received_by;
         $income->checked_by = $request->checked_by;
@@ -312,5 +326,11 @@ class RegistrationController extends Controller
     public function schoolFeeReceipt()
     {
 
+    }
+
+    public function deletedList(){
+        $incomes = Income::onlyTrashed()->paginate();
+        // dd($incomes);
+        return view('admins.registrations.deleted-history',compact('incomes'));
     }
 }

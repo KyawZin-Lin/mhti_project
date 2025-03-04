@@ -117,7 +117,11 @@
                                                     {{-- <th>Description</th> --}}
                                                     <th>Course</th>
                                                     <th>Batch</th>
+                                                    <th>Price</th>
+                                                    <th>Discount</th>
                                                     <th>Amount</th>
+
+
 
                                                 </tr>
                                             </thead>
@@ -143,9 +147,13 @@
 
                                                     </td>
                                                     {{-- <td>{{ $income->paymentType != null ? $income->paymentType->name : '' }}
-                                                    </td>
-                                                    <td>{{ $income->payment_installment }}</td> --}}
+                                                    </td>--}}
+                                                    <td>{{ $income->price }}</td>
+                                                    <td>{{ $income->discount }}</td>
+
                                                     <td>{{ $income->amount }}</td>
+
+
 
                                                 </tr>
                                                 {{-- @endforeach --}}
@@ -153,8 +161,16 @@
 
                                             <tfoot>
                                                 <tr>
-                                                    <td colspan="3" class="text-right">Total Amount: </td>
+                                                    <td colspan="5" class="text-right">Total Amount: </td>
                                                     <td>{{ $total }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="5" class="text-right">Pay Money: </td>
+                                                    <td>{{ $income->pay_money }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="5" class="text-right">Left Money: </td>
+                                                    <td>{{ $income->left_money }}</td>
                                                 </tr>
                                             </tfoot>
 

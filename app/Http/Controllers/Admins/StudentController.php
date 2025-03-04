@@ -62,6 +62,12 @@ class StudentController extends Controller
                                 ->paginate(10);
 
 
+        }elseif($request->student_id){
+            $studentId = $request->student_id;
+            $students = Student::with('academicYear','course','adminUser','state','township')
+                                ->where('student_no',$studentId)
+                                ->latest('id')
+                                ->paginate(10);
         }elseif($request->course_id){
             $courseId = $request->course_id;
             $students = Student::with('academicYear','course','adminUser','state','township')
@@ -132,49 +138,82 @@ class StudentController extends Controller
         ]);
     }
 
-    public function generate_numbers($start, $count, $digits) {
+    // public function generate_numbers($start, $count, $digits) {
 
-		for ($n = $start; $n < $start+$count; $n++) {
+	// 	for ($n = $start; $n < $start+$count; $n++) {
 
-			$result = str_pad($n, $digits, "0", STR_PAD_LEFT);
+	// 		$result = str_pad($n, $digits, "0", STR_PAD_LEFT);
 
-		}
-		return $result;
-	}
+	// 	}
+	// 	return $result;
+	// }
+
+    // public function generateStudentCode(Request $request)
+    // {
+    //     $course_id = $request->course_id;
+    //     $course = Degree::where('id',$course_id)->first();
+
+    //     if($course){
+    //         $income_abbre = GenerateStudentCode::where('course_abbre','LIKE',$course->abbreviation)->latest('id')->first();
+
+    //         $course_abbre = $course->abbreviation;
+
+    //         if(isset($income_abbre->course_no)){
+    //             $course_no = $income_abbre->course_no + 1;
+    //         }else{
+    //             $course_no = 401;
+    //         }
+
+    //         $student_no = $course->abbreviation.$this->generate_numbers((int)$course_no,1,5);
+    //     }
+
+    //     // $generateStudentCode = new GenerateStudentCode;
+    //     // $generateStudentCode->course_id = $course_id;
+    //     // if($course){
+    //     //     $generateStudentCode->course_abbre = $course->abbreviation;
+    //     //     if(isset($income_abbre->course_no)){
+    //     //         $generateStudentCode->course_no = $income_abbre->course_no + 1;
+    //     //     }else{
+    //     //         $generateStudentCode->course_no = 401;
+    //     //     }
+
+    //     //     $generateStudentCode->student_no = $course->abbreviation.$this->generate_numbers((int)$generateStudentCode->course_no,1,5);
+    //     // }
+
+    //     // $generateStudentCode->save();
+
+    //     return response()->json([
+    //         'success' => 'Success',
+    //         'student_no' => $student_no,
+    //         'course_id' => $course_id,
+    //         'course_abbre' => $course_abbre,
+    //         'course_no' => $course_no
+    //     ]);
+
+    // }
 
     public function generateStudentCode(Request $request)
-    {
-        $course_id = $request->course_id;
-        $course = Degree::where('id',$course_id)->first();
+{
+    $course_id = $request->course_id;
+    $course = Degree::where('id', $course_id)->first();
 
-        if($course){
-            $income_abbre = GenerateStudentCode::where('course_abbre','LIKE',$course->abbreviation)->latest('id')->first();
+    if ($course) {
+        $course_abbre = $course->abbreviation;
 
-            $course_abbre = $course->abbreviation;
+        // Get all existing numbers for this course in ascending order
+        $existing_numbers = GenerateStudentCode::where('course_abbre', $course_abbre)
+            ->orderBy('course_no', 'asc')
+            ->pluck('course_no')
+            ->toArray();
 
-            if(isset($income_abbre->course_no)){
-                $course_no = $income_abbre->course_no + 1;
-            }else{
-                $course_no = 401;
-            }
-
-            $student_no = $course->abbreviation.$this->generate_numbers((int)$course_no,1,5);
+        if (!empty($existing_numbers)) {
+            // Find the first missing number in the sequence
+            $course_no = $this->findNextAvailableNumber($existing_numbers);
+        } else {
+            $course_no = 401; // Start from 401 if no records exist
         }
 
-        // $generateStudentCode = new GenerateStudentCode;
-        // $generateStudentCode->course_id = $course_id;
-        // if($course){
-        //     $generateStudentCode->course_abbre = $course->abbreviation;
-        //     if(isset($income_abbre->course_no)){
-        //         $generateStudentCode->course_no = $income_abbre->course_no + 1;
-        //     }else{
-        //         $generateStudentCode->course_no = 401;
-        //     }
-
-        //     $generateStudentCode->student_no = $course->abbreviation.$this->generate_numbers((int)$generateStudentCode->course_no,1,5);
-        // }
-
-        // $generateStudentCode->save();
+        $student_no = $course_abbre . $this->generate_numbers((int) $course_no, 1, 5);
 
         return response()->json([
             'success' => 'Success',
@@ -183,8 +222,31 @@ class StudentController extends Controller
             'course_abbre' => $course_abbre,
             'course_no' => $course_no
         ]);
-
     }
+
+    return response()->json(['error' => 'Course not found'], 404);
+}
+
+// Helper function to find the next available number
+private function findNextAvailableNumber($existing_numbers)
+{
+    $start = 401; // The first number in the sequence
+
+    for ($i = 0; $i < count($existing_numbers); $i++) {
+        if ($existing_numbers[$i] != $start) {
+            return $start; // Found a missing number in sequence
+        }
+        $start++;
+    }
+
+    return $start; // If no gaps, return the next number in sequence
+}
+
+// Format number with leading zeros
+public function generate_numbers($start, $count, $digits)
+{
+    return str_pad($start, $digits, "0", STR_PAD_LEFT);
+}
 
     public function batchMessage(Request $request){
         $batchId = $request->batchId;
@@ -213,8 +275,12 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
+
+        // dd(request()->all());
         Validator::make($request->all(), [
             'name' => 'required',
+            'student_no' => 'required',
+
             // 'email' => 'required|unique:users,email',
             // 'phone' => 'required',
             // 'password' => 'required|same:confirm_password',
@@ -656,7 +722,9 @@ class StudentController extends Controller
             }
         }
 
+        // dd(GenerateStudentCode::where('student_no',$student->student_no)->first());
 
+        GenerateStudentCode::where('student_no',$student->student_no)->delete();
         $student->delete();
 
         User::where('student_id',$id)->delete();

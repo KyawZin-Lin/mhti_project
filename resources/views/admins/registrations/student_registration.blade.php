@@ -51,13 +51,13 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group row">
+                                {{-- <div class="form-group row">
                                     <label for="discount_or_not"  class="col-sm-4 col-form-label text-right"><b>
                                             Discount Or Not</b></label>
                                     <div class="col-sm-6">
                                        <input type="checkbox" name="discount_or_not" value="checked" id="discount_or_not">
                                     </div>
-                                </div>
+                                </div> --}}
 
 
                                 <div class="form-group row">
@@ -79,6 +79,7 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-md-4 text-right"><b>Course</b></label>
                                     <div class="col-sm-6 col-md-6">
+                                        <input type="hidden" name="course_id" id="course_id">
                                         {{-- <select name="course_id" id="course_id" class="myselect form-control">
                                             <option></option>
                                             @foreach ($courses as $course)
@@ -112,7 +113,7 @@
                                     <label for="code" class="col-sm-4 col-form-label text-right"><b>
                                             Code</b></label>
                                     <div class="col-sm-6">
-                                        <input type="text"  name="code" id="code" class="form-control"
+                                        <input type="text" name="code" id="code" class="form-control"
                                             value="{{ old('code') }}">
                                     </div>
                                 </div>
@@ -191,7 +192,7 @@
                                     <label for="particular" class="col-sm-4 col-form-label text-right"><b>
                                             Price</b></label>
                                     <div class="col-sm-6">
-                                        <p class="price"></p>
+                                        <input type="number" readonly class="price form-control" name="price" id="price">
                                     </div>
                                 </div>
 
@@ -199,7 +200,9 @@
                                     <label for="group" class="col-sm-4 col-form-label text-right"><b>
                                             Discount</b></label>
                                     <div class="col-sm-6">
-                                        <p class="discount"></p>
+                                        {{-- <p class="discount"></p> --}}
+                                        <input type="number" name="discount" id="discount" value="0"
+                                            class="form-control">
                                     </div>
                                 </div>
 
@@ -210,6 +213,26 @@
                                         <p class="amount"></p>
                                         <input type="hidden" name="amount" class="amount form-control"
                                             value="{{ old('amount') }}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="group" class="col-sm-4 col-form-label text-right"><b>
+                                            Pay Amount</b></label>
+                                    <div class="col-sm-6">
+                                        {{-- <p class="discount"></p> --}}
+                                        <input type="number" name="pay_money" id="pay_amount" value="0"
+                                            class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="group" class="col-sm-4 col-form-label text-right"><b>
+                                            Left Amount</b></label>
+                                    <div class="col-sm-6">
+                                        {{-- <p class="discount"></p> --}}
+                                        <input type="number" name="left_money" id="left_amount" value="0"
+                                            class="form-control">
                                     </div>
                                 </div>
 
@@ -272,7 +295,7 @@
 @section('script')
     <script>
         $(document).ready(function() {
-            var checkBox = document.getElementById("discount_or_not");
+            // var checkBox = document.getElementById("discount_or_not");
             $('#student_id').change(function() {
                 var studentId = $('#student_id').val();
 
@@ -288,20 +311,37 @@
                     success: function(res) {
                         console.log(res);
                         $('.course').text(res.course);
+                        $('#course_id').val(res.course_id);
+
+
                         $('.batch').text(res.batch);
-                        $('.price').text(res.price);
 
+                        if(res.left_money > 0){
+                            $('.price').text(res.left_money);
+                            $('.price').val(res.left_money);
 
-                        if(checkBox.checked){
-                            $('.amount').text(res.amount);
-                        $('.amount').val(res.amount);
-                        $('.discount').text(res.discount + '%');
+                            $('.amount').text(res.left_money);
+                            $('.amount').val(res.left_money);
                         }else{
+                            $('.price').text(res.price);
+                            $('.price').val(res.price);
+
                             $('.amount').text(res.price);
                             $('.amount').val(res.price);
-                        $('.discount').text('0%');
-
                         }
+
+
+
+                        // if(checkBox.checked){
+                        // $('.amount').text(res.amount);
+                        // $('.amount').val(res.amount);
+                        // $('.discount').text(res.discount + '%');
+                        // }else{
+                        // $('.amount').text(res.price);
+                        // $('.amount').val(res.price);
+                        // $('.discount').text('0%');
+
+                        // }
 
                     }
                 })
@@ -315,6 +355,23 @@
 
 
             })
+            $('#discount').change(() => {
+
+                $discount = $('#discount').val();
+                $price = $('.price').val();
+                $amount = $price - $discount;
+                $('.amount').text($amount);
+                $('.amount').val($amount);
+            });
+
+            $('#pay_amount').change(() => {
+
+                $amount = $('.amount').val();
+                $pay_amount = $('#pay_amount').val();
+                $left_amount = $amount - $pay_amount;
+                $('#left_amount').val($left_amount);
+            });
+
         })
     </script>
 @endsection
