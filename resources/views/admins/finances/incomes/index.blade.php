@@ -8,7 +8,7 @@
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-sm-2">
+                <div class="col-sm-1">
                     <h6>Income List</h6>
                 </div>
 
@@ -34,7 +34,7 @@
                     </form>
                 </div>
 
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <form action="{{ route('admin.incomes.index') }}" method="GET">
                         @csrf
 
@@ -55,10 +55,17 @@
 
                         </div>
                     </form>
+
+                </div>
+
+                <div class="col-sm-2 text-right">
+                    <a href="{{ route('admin.incomes.index') }}"><button type="button"
+                        class="btn btn-md btn-warning mr-1"><b><i class="fas fa-trash"></i> Clear</b></button></a>
+
                 </div>
 
                 <div class="col-sm-3 text-right">
-                    <a href="{{ route('admin.income_export') }}"><button type="button"
+                    <a href="{{ route('admin.income_export',request()->all()) }}"><button type="button"
                             class="btn btn-md btn-success mr-1"><b><i class="fas fa-file-excel"></i> Export</b></button></a>
 
                     {{-- <a href="{{ route('admin.incomes.create') }}"><button type="button" class="btn btn-md btn-success"

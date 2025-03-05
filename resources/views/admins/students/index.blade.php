@@ -10,9 +10,9 @@
         <div class="container-fluid">
             <div class="row mb-2 title-bar">
                 <div class="col-sm-2">
-                    <div class="float-left">Students</div>
+                    <div class="">Students</div>
                 </div>
-                <div class="col-sm-10 text-end">
+                <div class="col-sm-10 ">
                     {{-- {{dd(auth()->user()->limit_user)}}/ --}}
                     @if ($limit?->limit_student >= count($students))
                         <a href="{{ route('admin.students.create') }}"><button type="button" class="btn btn-md btn-success"
@@ -25,6 +25,10 @@
                                 class="btn btn-md btn-success mr-1" style="float:right;"><i class="fas fa-plus-circle"></i>
                                 Increase Limit</button></a> &nbsp;
                     @endif
+
+                    <a href="{{route('admin.students.excel-export',request()->all())}}"><button type="button" class="btn btn-md btn-success mr-1"
+                        style="float:right;"><b><i class="fas fa-file-excel"></i>
+                            Export</b></button></a>
                 </div>
 
                 <div class="col-sm-12">
@@ -68,7 +72,7 @@
             </div>
 
             <div class="row">
-                <div class="col-sm-3">
+                <div class="col-sm-1">
                     <h5><b>Total {{ count($students) }}</b></h5>
                 </div>
 
@@ -102,22 +106,33 @@
                     </div>
                 </div>
 
-                <div class="col-sm-3">
+                <div class="col-sm-5">
                     <form action="{{ route('admin.students.index') }}" method="GET">
                         @csrf
 
 
                         <div class="form-group row">
-                            <div class="col-sm-8 m-0 p-0">
+                            <div class="col-sm-4 m-0 p-0">
 
                                 <input type="text" name="search" id="search" class="form-control bg-white"
                                     value="{{ request()->search }}" placeholder="Search Name...">
-                                <input type="text" name="student_id" id="student_id" class="form-control bg-white"
-                                    value="{{ request()->student_id }}" placeholder="Search Student ID...">
+
                             </div>
 
-                            <div class="col-sm-4">
-                                <button type="submit" class="btn btn-md btn-theme btn-success w-100">Search</button>
+                            <div class="col-sm-4 m-0 p-0">
+
+                                <input type="text" name="student_id" id="student_id" class="form-control bg-white"
+                                    value="{{ request()->student_id }}" placeholder="Search Student Course ID...">
+
+                            </div>
+
+
+
+                            <div class="col-sm-2">
+                                <button type="submit" class="btn btn-md btn-theme btn-success">Search</button>
+                            </div>
+                            <div class="col-sm-2">
+                               <a href="{{route('admin.students.index')}}"> <button type="button" class="btn btn-md btn-theme btn-warning">Clear</button></a>
                             </div>
                         </div>
 

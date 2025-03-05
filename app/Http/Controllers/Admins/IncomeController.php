@@ -209,6 +209,46 @@ class IncomeController extends Controller
 
     public function export()
     {
-        return Excel::download(new ExportIncomes, 'incomes.xlsx');
+        // dd(request()->all());
+        if(request()->from_date && request()->to_date){
+            $from_date = Carbon::parse(request()->from_date);
+            $to_date = Carbon::parse(request()->to_date);
+
+            $incomes = Income::whereDate('date', '>=', $from_date)
+                            ->whereDate('date', '<=', $to_date)
+                            ->latest('id')
+                            ->get();
+
+
+        }elseif(request()->monthly_search){
+            $monthly_search = Carbon::parse(request()->monthly_search);
+            $incomes = Income::whereMonth('date',$monthly_search)
+                                ->whereYear('date',$monthly_search)
+                                ->latest('id')
+                                ->get();
+
+
+
+        }elseif(request()->daily_search){
+            $daily_search = Carbon::parse(request()->daily_search);
+            $incomes = Income::whereDate('date',$daily_search)
+                                ->latest('id')
+                                ->get();
+
+
+
+        }elseif(request()->student_id){
+            $incomes = Income::where('student_id',request()->student_id)
+                                ->latest('id')
+                                ->get();
+
+
+
+        }else{
+            $incomes = Income::latest('id')->get();
+
+            $incomes_count = Income::latest('id')->get()->count();
+        }
+        return Excel::download(new ExportIncomes($incomes), 'incomes.xlsx');
     }
 }

@@ -68,6 +68,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin_user')->group(fun
     Route::get('/courseBatchAjax',[RegistrationController::class,'courseBatchAjax'])->name('courseBatchAjax');
 
     Route::resource('/students',StudentController::class);
+    Route::get('export-excel',[StudentController::class,'exportStudent'])->name('students.excel-export');
 
     Route::get('/card/{id}',[StudentController::class,'card'])->name('students.card');
 

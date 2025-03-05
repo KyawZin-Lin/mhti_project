@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Exports\ExportStudent;
 use Image;
 use Carbon\Carbon;
 use App\Models\User;
@@ -33,6 +34,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Admins\AnnouncementComment;
 use App\Models\Admins\GenerateStudentCode;
 use App\Models\Admins\StudentMedicalStatus;
+use Maatwebsite\Excel\Facades\Excel;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class StudentController extends Controller
@@ -193,60 +195,60 @@ class StudentController extends Controller
     // }
 
     public function generateStudentCode(Request $request)
-{
-    $course_id = $request->course_id;
-    $course = Degree::where('id', $course_id)->first();
+    {
+        $course_id = $request->course_id;
+        $course = Degree::where('id', $course_id)->first();
 
-    if ($course) {
-        $course_abbre = $course->abbreviation;
+        if ($course) {
+            $course_abbre = $course->abbreviation;
 
-        // Get all existing numbers for this course in ascending order
-        $existing_numbers = GenerateStudentCode::where('course_abbre', $course_abbre)
-            ->orderBy('course_no', 'asc')
-            ->pluck('course_no')
-            ->toArray();
+            // Get all existing numbers for this course in ascending order
+            $existing_numbers = GenerateStudentCode::where('course_abbre', $course_abbre)
+                ->orderBy('course_no', 'asc')
+                ->pluck('course_no')
+                ->toArray();
 
-        if (!empty($existing_numbers)) {
-            // Find the first missing number in the sequence
-            $course_no = $this->findNextAvailableNumber($existing_numbers);
-        } else {
-            $course_no = 401; // Start from 401 if no records exist
+            if (!empty($existing_numbers)) {
+                // Find the first missing number in the sequence
+                $course_no = $this->findNextAvailableNumber($existing_numbers);
+            } else {
+                $course_no = 401; // Start from 401 if no records exist
+            }
+
+            $student_no = $course_abbre . $this->generate_numbers((int) $course_no, 1, 5);
+
+            return response()->json([
+                'success' => 'Success',
+                'student_no' => $student_no,
+                'course_id' => $course_id,
+                'course_abbre' => $course_abbre,
+                'course_no' => $course_no
+            ]);
         }
 
-        $student_no = $course_abbre . $this->generate_numbers((int) $course_no, 1, 5);
-
-        return response()->json([
-            'success' => 'Success',
-            'student_no' => $student_no,
-            'course_id' => $course_id,
-            'course_abbre' => $course_abbre,
-            'course_no' => $course_no
-        ]);
+        return response()->json(['error' => 'Course not found'], 404);
     }
-
-    return response()->json(['error' => 'Course not found'], 404);
-}
 
 // Helper function to find the next available number
-private function findNextAvailableNumber($existing_numbers)
-{
-    $start = 401; // The first number in the sequence
+    private function findNextAvailableNumber($existing_numbers)
+    {
+        $start = 401; // The first number in the sequence
 
-    for ($i = 0; $i < count($existing_numbers); $i++) {
-        if ($existing_numbers[$i] != $start) {
-            return $start; // Found a missing number in sequence
+        for ($i = 0; $i < count($existing_numbers); $i++) {
+            if ($existing_numbers[$i] != $start) {
+                return $start; // Found a missing number in sequence
+            }
+            $start++;
         }
-        $start++;
+
+        return $start; // If no gaps, return the next number in sequence
     }
 
-    return $start; // If no gaps, return the next number in sequence
-}
-
 // Format number with leading zeros
-public function generate_numbers($start, $count, $digits)
-{
-    return str_pad($start, $digits, "0", STR_PAD_LEFT);
-}
+    public function generate_numbers($start, $count, $digits)
+    {
+        return str_pad($start, $digits, "0", STR_PAD_LEFT);
+    }
 
     public function batchMessage(Request $request){
         $batchId = $request->batchId;
@@ -961,6 +963,42 @@ public function generate_numbers($start, $count, $digits)
         $incomes = Income::where('student_id',$id)->latest('id')->get();
         $absents = Absent::with('classroom')->latest('id')->get();
         return view('admins.students.student_enrollment_detail',compact('student','studentMedicalStatuses','absents','incomes'));
+    }
+
+    public function exportStudent(){
+        if(request()->search){
+            $search = request()->search;
+            $students = Student::with('academicYear','course','adminUser','state','township')
+                                ->where('name','LIKE',$search.'%')
+                                ->latest('id')
+                                ->get();
+
+
+        }elseif(request()->student_id){
+            $studentId = request()->student_id;
+            $students = Student::with('academicYear','course','adminUser','state','township')
+                                ->where('student_no',$studentId)
+                                ->latest('id')
+                                ->get();
+        }elseif(request()->course_id){
+            $courseId = request()->course_id;
+            $students = Student::with('academicYear','course','adminUser','state','township')
+                ->where('degree_id',$courseId)
+                ->latest('id')
+                ->get();
+        }elseif(request()->batch_id){
+            $batchId = request()->batch_id;
+            $students = Student::with('academicYear','course','adminUser','state','township')
+                ->where('batch_id',$batchId)
+                ->latest('id')
+                ->get();
+        }else{
+        $students = Student::with('academicYear','course','adminUser','state','township')
+                            ->latest('id')->get();
+
+        }
+
+        return Excel::download(new ExportStudent($students), 'students.xlsx');
     }
 
 }

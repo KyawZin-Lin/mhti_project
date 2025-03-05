@@ -17,11 +17,18 @@ class ExportIncomes implements FromView
     //     return Income::all();
     // }
 
+    protected $incomes;
+
+    public function __construct( $incomes)
+    {
+        $this->incomes = $incomes;
+    }
+
     public function view(): View
     {
         return view('admins.finances.incomes.export', [
             // 'cms' => CompanyMembership::all(),
-            'incomes' => Income::with('student','incomeSource','adminUser')->get(),
+            'incomes' => $this->incomes,
         ]);
     }
 }
